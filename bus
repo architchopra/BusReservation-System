@@ -1,0 +1,274 @@
+#include<bits/stdc++.h>
+#include<fstream>
+
+using namespace std;
+void create();
+void reserve();
+void show();
+class Vehicle{
+	public:
+		int myindex=-1;
+		string Busname, destin,source ;
+		string driver;
+		vector<bool> seats;
+
+};
+class Bus : public Vehicle{
+public:
+	bool isempty(int i){		//returns true if seat is empty else false
+		if(!seats[i-1])
+			return true;
+		else{
+			cout<<"seat occupied";
+			return false;
+		}
+	}
+	bool reserve(int a){		//returns true if sucessfully reserved else false
+		if(a>seats.size()){
+			cout<<"seat limit exceeded\n";
+			return(false);
+		}
+		else{
+			if(this->isempty(a))
+				seats[a-1]=1;
+			else
+				return(0);
+		}
+	}
+};
+
+
+class Taxi : public Vehicle{
+    public:
+	Taxi(){
+		this->seats.resize(1);
+	}
+	bool isempty(){
+		return(!seats[0]);
+	}
+	bool reserve(){		//returns true if sucessfully reserved else false
+		if(isempty())
+			seats[0]=1;
+		else{
+            cout<<"\nSeat already occupied\n";
+			return(0);
+        }
+	}
+};
+
+Bus buses[10];
+Taxi taxies[10];
+int bi=-1,ti=-1,bj=-1,tj=-1;
+
+void save(){
+	ofstream file;
+	file.open("buses.txt");
+	while(bj != bi){
+		file<<buses[bj].myindex;
+		file<<buses[bj].Busname;
+		file<<buses[bj].driver;
+		file<<buses[bj].destin;
+		file<<buses[bj].source;
+		file<<buses[bj].seats.size();
+		for (int k = 0 ; k < buses[bj].seats.size() ; k++){
+			bool jim =buses[bi].seats[k];
+            if(jim)
+                file<<1;
+            else
+                file<<0;
+		}
+		bj++;
+	}
+	file.close();
+}
+
+void retrieve(){
+	ifstream file;
+	file.open("buses.txt");
+	int n,nump;
+	while(file>>n){
+		file>>buses[bi].myindex;
+		file>>buses[bi].Busname;
+		file>>buses[bi].driver;
+		file>>buses[bi].destin;
+		file>>buses[bi].source;
+		file>>nump;
+		buses[bi].seats.resize(nump);
+		for (int k = 0 ; k < nump ; k++){
+            int g;
+			file>>g;
+            if(g)
+                buses[bi].seats[k]=1;
+            else
+                buses[bi].seats[k]=0;
+		}
+		bi++;
+		bj++;
+	}
+	file.close();
+}
+
+void mainmenu(){
+system("cls");
+	int c;
+	while(1)
+	{
+		cout<<"\n1.create\n" <<"2.Reservation\n"<<"3.Show\n"<<"4.Exit";
+		cout<<"\nEnter your choice:-> ";
+		cin>>c;
+		switch(c){
+		  	case 1:
+		  		create();
+		    	break;
+		    case 2:
+		    	reserve();
+		    	break;
+		    case 3:
+		    	show();
+		      	break;
+		    case 4:
+		    	save();
+		        exit(0);
+		}
+	}
+}
+void create(){
+	int c;
+	cout<<"\nChoose your vehicle to create\n1.Bus\n2.Taxi\n3.Exit\nEnter your choice -> ";
+	cin>>c;
+	switch(c){
+		case 1:
+		    bi++;
+			buses[bi].myindex=bi+1;
+			cout<<"\nEnter the vehicle name\n->";
+			cin>>buses[bi].Busname;
+			cout<<"\nEnter the name of driver\n->";
+			cin>>buses[bi].driver;
+			cout<<"\nEnter the name of destination\n->";
+			cin>>buses[bi].destin;
+			cout<<"\nEnter the name of source\n->";
+			cin>>buses[bi].source;
+			cout<<"\nEnter the number of seats\n->";
+			int t;
+			cin>>t;
+			buses[bi].seats.resize(t);
+			create();
+			break;
+		case 2:
+		    ti++;
+			taxies[ti].myindex=ti+1;
+			cout<<"Enter the vehicle name\n";
+			cin>>taxies[ti].Busname;
+			cout<<"\nEnter the name of driver\n";
+			cin>>taxies[ti].driver;
+			cout<<"\nEnter the name of destination\n";
+			cin>>taxies[ti].destin;
+			cout<<"\nEnter the name of source\n";
+			cin>>taxies[ti].source;
+			create();
+			break;
+		case 3:
+			mainmenu();
+			break;
+		default:
+		create();
+	}
+}
+void reserve(){
+	int c;
+	cout<<"\nChoose your vehicle\n1.Bus\n2.Taxi\n3.Exit\nEnter yoir choice->";
+	cin>>c;
+	switch(c){
+		case 1:
+			int ab;
+			cout<<"\nEnter Bus index\n";
+			cin>>ab;
+			if(buses[ab-1].myindex==-1){
+				cout<<"\nBus doesn't exist\nTry again\n";
+				reserve();
+			}
+			else{
+				int s;
+				cout<<"\nEnter your seat number\n";
+				cin>>s;
+				if(buses[ab-1].reserve(s)){
+					cout<<"\nseat reserved succesfully\n";
+					show();
+				}
+				else{
+					reserve();
+				}
+			}
+			break;
+		case 2:
+			int abc;
+			cout<<"\nEnter Taxi index,Taxi has only 1 seat\n";
+			cin>>abc;
+			if(taxies[abc-1].myindex==-1){
+				cout<<"\nTaxi doesn't exist\n";
+				create();
+			}
+			else{
+				if(taxies[abc-1].reserve()){
+					cout<<"\nSeat reserved succesfully\n";
+					show();
+				}
+				else{
+					reserve();
+				}
+			}
+			break;
+		case 3:
+			mainmenu();
+			break;
+		default:
+		    cout<<"Wrong Choice.Try Again\n";
+            reserve();
+	}
+}
+void show(){
+cout<<"List of buses are \n";
+cout<<"Index number\t Busname    \t Driver \t Destination  \t Source    \t Total seats\t Seats reserved\n";
+for(int i=0;i<=bi;i++){
+	int a=buses[i].Busname.size();
+	cout<<buses[i].myindex<<string(17,' ')<<buses[i].Busname<<string(15-a,' ');
+	a=buses[i].driver.size();
+	cout<<buses[i].driver<<string(15-a,' ');
+	a=buses[i].destin.size();
+	cout<<buses[i].destin<<string(15-a,' ');
+	a=buses[i].source.size();
+	cout<<buses[i].source<<string(15-a,' ');
+	cout<<buses[i].seats.size()<<"\t\t";
+	for(int a=0;a<buses[i].seats.size();a++){
+		if(buses[i].seats[a]){
+			cout<<a+1<<' ';
+		}
+	}
+	cout<<'\n';
+}
+	cout<<"\n";
+	cout<<"List of Taxies are \n";
+cout<<"Index number\t Taxiname    \t Driver \t Destination  \t Source    \t Reserved status\n";
+for(int i=0;i<=ti;i++){
+	int a=taxies[i].Busname.size();
+	cout<<taxies[i].myindex<<string(17,' ')<<buses[i].Busname<<string(15-a,' ');
+	a=taxies[i].driver.size();
+	cout<<taxies[i].driver<<string(15-a,' ');
+	a=taxies[i].destin.size();
+	cout<<buses[i].destin<<string(15-a,' ');
+	a=taxies[i].source.size();
+	cout<<taxies[i].source<<string(15-a,' ');
+	if(buses[i].seats[0]){
+			cout<<"Yes";
+	}
+	else
+		cout<<"No";
+	cout<<"\n";
+}
+reserve();
+}
+int main(){
+	retrieve();
+	mainmenu();
+	return 0;
+}
